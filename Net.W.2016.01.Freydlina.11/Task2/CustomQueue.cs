@@ -22,6 +22,7 @@ namespace Task2
         /// <param name="startSize">Could be start collection size specified. Start size is 5 by default</param>
         public CustomQueue(int startSize = 5)
         {
+            if (startSize < 0) throw  new ArgumentException("Size must be positive");
             collection = new CustomCollection<T>(startSize);
             head = 0;
             tail = 0;
@@ -31,7 +32,7 @@ namespace Task2
         /// Creates queue from specified array
         /// </summary>
         /// <param name="elements"></param>
-        public CustomQueue(IEnumerable<T> elements): this(elements.Count())
+        public CustomQueue(T[] elements): this(elements.Length)
         {
             foreach (T t in elements)
                 Push(t);
@@ -68,11 +69,8 @@ namespace Task2
         /// Returns element from head of queue, but doesn't delete it
         /// </summary>
         /// <returns></returns>
-        public T Peek()
-        {
-            return collection.Elements[head];
-        }
-
+        public T Peek() => collection.Elements[head];
+        
         /// <summary>
         /// Count of elements from queue head to tail
         /// </summary>
@@ -84,19 +82,13 @@ namespace Task2
             return tail - head;
         }
 
-        public void Clear()
-        {
-            collection = new CustomCollection<T>(Size);
-        }
+        public void Clear() => collection = new CustomCollection<T>(Size);
         
         public IEnumerator<T> GetEnumerator()
         {
             return collection;
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }
