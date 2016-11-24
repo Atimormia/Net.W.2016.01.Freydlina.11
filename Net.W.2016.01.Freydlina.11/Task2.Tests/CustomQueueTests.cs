@@ -59,9 +59,9 @@ namespace Task2.Tests
             {
                 string result = "1 ";
                 yield return new TestCaseData(new int[] { 2 }, result).Returns(true);
-                result = "48 6 1 1";
+                result = "48 6 1 1 ";
                 yield return new TestCaseData(new int[] { 18, 48, 6, 1 },result).Returns(true);
-                result = "48 6 1 3 1";
+                result = "48 6 1 3 1 ";
                 yield return new TestCaseData(new int[] { 18, 48, 6, 1, 3 },result).Returns(true);
             }
         }

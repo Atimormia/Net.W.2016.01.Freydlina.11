@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CustomQueue.cs" />
+    <Compile Include="CustomSet.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CustomCollection.cs" />
   </ItemGroup>

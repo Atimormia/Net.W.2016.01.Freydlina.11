@@ -56,19 +56,17 @@
   <ItemGroup>
     <Compile Include="CustomCollectionTests.cs" />
     <Compile Include="CustomQueueTests.cs" />
+    <Compile Include="CustomSetTests.cs" />
+    <Compile Include="Person.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Task2\Task2.csproj">
+    <ProjectReference Include="..\Task2\Task23.csproj">
       <Project>{f1c8c697-0097-45d9-98e5-5bdc5f73479c}</Project>
-      <Name>Task2</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Task3.Tests\Task3.Tests.csproj">
-      <Project>{1d373501-dfaa-401a-b1e9-a6bbd37ae9cd}</Project>
-      <Name>Task3.Tests</Name>
+      <Name>Task23</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>
