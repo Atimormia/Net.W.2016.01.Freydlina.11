@@ -14,7 +14,7 @@ namespace Task2
         /// <summary>
         /// Contains real collection size including non specified elements
         /// </summary>
-        public int Size => collection.Elements.Length;
+        public int Size => collection.Size;
 
         /// <summary>
         /// Creates empty queue
@@ -48,7 +48,7 @@ namespace Task2
         {
             if (Count() >= Size-1)
                 collection.Resize();
-            collection.Elements[tail] = item;
+            collection[tail] = item;
             tail = (tail + 1) % Size;
         }
 
@@ -60,7 +60,7 @@ namespace Task2
         {
             if (IsEmpty())
                 throw new NullReferenceException();
-            T result = collection.Elements[head];
+            T result = collection[head];
             head = (head + 1) % Size;
             return result;
         }
@@ -69,7 +69,7 @@ namespace Task2
         /// Returns element from head of queue, but doesn't delete it
         /// </summary>
         /// <returns></returns>
-        public T Peek() => collection.Elements[head];
+        public T Peek() => collection[head];
         
         /// <summary>
         /// Count of elements from queue head to tail
@@ -86,7 +86,12 @@ namespace Task2
         
         public IEnumerator<T> GetEnumerator()
         {
-            return collection;
+            int i = head;
+            while (i != tail)
+            {
+                yield return collection[i];
+                i = (i != Size - 1) ? (i + 1) : 0;
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

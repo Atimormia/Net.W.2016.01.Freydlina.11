@@ -57,23 +57,26 @@ namespace Task2.Tests
         {
             get
             {
-                yield return new TestCaseData(new int[] { 1 }).Returns("1 1 ");
-                yield return new TestCaseData(new int[] { 18, 48, 6, 1 }).Returns("18 48 6 1 1 0 0 0 ");
-                yield return new TestCaseData(new int[] { 18, 48, 6, 1, 3 }).Returns("18 48 6 1 3 1 0 0 0 0 ");
+                string result = "1 ";
+                yield return new TestCaseData(new int[] { 2 }, result).Returns(true);
+                result = "48 6 1 1";
+                yield return new TestCaseData(new int[] { 18, 48, 6, 1 },result).Returns(true);
+                result = "48 6 1 3 1";
+                yield return new TestCaseData(new int[] { 18, 48, 6, 1, 3 },result).Returns(true);
             }
         }
 
-        [Test, TestCaseSource(nameof(TestCasesForPop))]
-        public string TestGetEnumenator(int[] elements)
+        [Test, TestCaseSource(nameof(TestCasesForEnumenator))]
+        public bool TestGetEnumenator(int[] elements, string expectedResult)
         {
             CustomQueue<int> queue = new CustomQueue<int>(elements);
             queue.Pop();
             queue.Push(1);
-            //string result = "";
-            //foreach (var i in queue)
-            //    result = result + (i + " ");
-            //return result;
-            return queue.Aggregate("", (current, i) => current + (i + " "));
+            string result = "";
+            foreach (var i in queue)
+                result += i + " ";
+            return expectedResult.Equals(result);
+            //return queue.Aggregate("", (current, i) => current + (i + " "));
         }
     }
 }

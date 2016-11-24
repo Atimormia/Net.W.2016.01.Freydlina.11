@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,17 +10,25 @@ namespace Task2
 {
     public class CustomCollection<T> : ICollection<T>, IEnumerator<T>
     {
-        public T[] Elements { get; private set; }
+        private T[] elements;
         private int end = 0;
-
         private int pointer = -1;
+
+        public int Size => elements.Length;
+        public T this[int i]
+        {
+            get { return elements[i]; }
+            set { elements[i] = value; }
+        }
+        public int Count => end;
+        public bool IsReadOnly { get; }
         public T Current
         {
             get
             {
                 if (pointer == -1)
                     throw new InvalidOperationException();
-                return Elements[pointer];
+                return elements[pointer];
             }
         }
         
@@ -30,7 +39,7 @@ namespace Task2
         public CustomCollection(int size = 0)
         {
             if (size < 0) throw new ArgumentException("Size must be positive");
-            Elements = new T[size];
+            elements = new T[size];
         }
 
         /// <summary>
@@ -41,37 +50,25 @@ namespace Task2
         /// <param name="startIndex">element which to start coping</param>
         public CustomCollection(T[] elements, int count, int startIndex = 0): this(count)
         {
-            int minLen = elements.Length - startIndex < this.Elements.Length ? elements.Length : this.Elements.Length;
+            int minLen = elements.Length - startIndex < this.Size ? elements.Length : this.Size;
             for (int i = startIndex; i < minLen; i++)
-                this.Elements[i] = elements[i];
+                this.elements[i] = elements[i];
         }
 
-        public CustomCollection(CustomCollection<T> collection) : this(collection.Elements)
-        {}
+        public CustomCollection(CustomCollection<T> collection) : this(collection.elements)
+        {
+            end = collection.Count;
+        }
 
         public CustomCollection(T[] elements) : this(elements, elements.Length)
         {}
-
-        public void Dispose() {}
-
-        public bool MoveNext()
-        {
-            if (pointer < Elements.Length - 1)
-            {
-                pointer++;
-                return true;
-            }
-            return false;
-        }
-
-        public void Reset() => pointer = -1;
 
         /// <summary>
         /// Increases in half size of collection
         /// </summary>
         public void Resize()
         {
-            int newSize = Elements.Length > 0 ? Elements.Length*2 : 2;
+            int newSize = Size > 0 ? Size*2 : 2;
             Resize(newSize);
         }
 
@@ -81,13 +78,30 @@ namespace Task2
         /// <param name="newSize"></param>
         public void Resize(int newSize)
         {
-            Elements = new CustomCollection<T>(Elements, newSize).Elements;
+            elements = new CustomCollection<T>(elements, newSize).elements;
         }
+
+        public void Dispose() {}
+
+        public bool MoveNext()
+        {
+            if (pointer < Count - 1)
+            {
+                pointer++;
+                return true;
+            }
+            return false;
+        }
+
+        public void Reset() => pointer = -1;
 
         object IEnumerator.Current => Current;
         public IEnumerator<T> GetEnumerator()
         {
-            return this;
+            for (int i = 0; i < end; i++)
+            {
+                yield return elements[i];
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -97,21 +111,21 @@ namespace Task2
 
         public void Add(T item)
         {
-            if (end == Elements.Length - 1) Resize();
-            Elements[end] = item;
+            if (end == Size - 1 || Size == 0) Resize();
+            elements[end] = item;
             end++;
         }
 
         public void Clear()
         {
-            Elements = new T[Elements.Length];
+            elements = new T[Size];
             end = 0;
         }
 
         public bool Contains(T item)
         {
             for (int i = 0; i < end; i++)
-                if (Elements[i].Equals(item))
+                if (elements[i].Equals(item))
                     return true;
             return false;
         }
@@ -119,25 +133,17 @@ namespace Task2
         public int IndexOf(T item)
         {
             for (int i = 0; i < end; i++)
-                if (Elements[i].Equals(item))
+                if (elements[i].Equals(item))
                     return i;
             return -1;
         }
 
         public void CopyTo(T[] array, int arrayIndex)
         {
-            for (int i = arrayIndex; i < Elements.Length; i++)
+            for (int i = arrayIndex; i < Size; i++)
             {
-                Elements[i] = array[i - arrayIndex];
+                elements[i] = array[i - arrayIndex];
             }
-        }
-
-        private void Move(int index)
-        {
-            if (index < 0) throw new ArgumentException();
-            for (int i = index; i <= end; i++)
-                Elements[i] = i != Elements.Length - 1 ? Elements[i + 1] : default(T);
-            end--;
         }
 
         public bool Remove(T item)
@@ -148,7 +154,49 @@ namespace Task2
             return true;
         }
 
-        public int Count => end + 1;
-        public bool IsReadOnly { get; }
+        public override bool Equals(object obj)
+        {
+            if (!(obj is CustomCollection<T>)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+
+            CustomCollection<T> customCollectionObj = (CustomCollection<T>) obj;
+            if (Count != customCollectionObj.Count) return false;
+            for (int i = 0; i < end;i++)
+                if (!elements[i].Equals(customCollectionObj[i]))
+                    return false;
+            return true;
+        }
+
+        protected bool Equals(CustomCollection<T> other)
+        {
+            return Equals(elements, other.elements) && end == other.end && pointer == other.pointer && IsReadOnly == other.IsReadOnly;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = elements?.GetHashCode() ?? 0;
+                hashCode = (hashCode*397) ^ IsReadOnly.GetHashCode();
+                return hashCode;
+            }
+        }
+
+        public void Trim()
+        {
+            T[] newCollection = new T[Count+1];
+            for (int i = 0; i < Count+1; i++)
+                newCollection[i] = elements[i];
+            elements = newCollection;
+        }
+
+        private void Move(int index)
+        {
+            if (index < 0) throw new ArgumentException();
+            for (int i = index; i <= end; i++)
+                elements[i] = i != Size - 1 ? elements[i + 1] : default(T);
+            end--;
+        }
+
     }
 }
