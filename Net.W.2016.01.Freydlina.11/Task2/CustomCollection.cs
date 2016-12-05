@@ -52,7 +52,7 @@ namespace Task2
         {
             int minLen = elements.Length - startIndex < this.Size ? elements.Length : this.Size;
             for (int i = startIndex; i < minLen; i++)
-                this.elements[i] = elements[i];
+                Add(elements[i]);
         }
 
         public CustomCollection(CustomCollection<T> collection) : this(collection.elements)
@@ -60,7 +60,7 @@ namespace Task2
             end = collection.Count;
         }
 
-        public CustomCollection(T[] elements) : this(elements, elements.Length)
+        public CustomCollection(T[] elements) : this(elements, count:elements.Length+1)
         {}
 
         /// <summary>
@@ -81,7 +81,10 @@ namespace Task2
             elements = new CustomCollection<T>(elements, newSize).elements;
         }
 
-        public void Dispose() {}
+        public void Dispose()
+        {
+            pointer = 0;
+        }
 
         public bool MoveNext()
         {
@@ -182,12 +185,21 @@ namespace Task2
             }
         }
 
+        /// <summary>
+        /// Deletes empty items in collection. Saves memory
+        /// </summary>
         public void Trim()
         {
             T[] newCollection = new T[Count+1];
             for (int i = 0; i < Count+1; i++)
                 newCollection[i] = elements[i];
             elements = newCollection;
+        }
+
+        public void SortBy<TKey>(Func<T, TKey> sorter)
+        {
+            Trim();
+            elements = elements.OrderBy(sorter).ToArray();
         }
 
         private void Move(int index)

@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Task2
 {
-    public class CustomSet<T>: IEnumerable<T> where T: class
+    public class CustomSet<T>: IEnumerable<T>, IEquatable<CustomSet<T>> where T: class
     {
         public CustomCollection<T> Collection { get; }
         /// <summary>
@@ -27,11 +27,11 @@ namespace Task2
             Collection = new CustomCollection<T>(size);
         }
 
-        //public CustomSet(T[] elements) : this(elements.Length + 1)
-        //{
-        //    Collection = new CustomCollection<T>(elements);
-        //}
-
+        public CustomSet(IEnumerable<T> elements) : this()
+        {
+            Collection = new CustomCollection<T>(elements.ToArray());
+        }
+        
         /// <summary>
         /// Creates set from another set
         /// </summary>
@@ -40,23 +40,27 @@ namespace Task2
         {
             Collection = new CustomCollection<T>(set.Collection);
         }
-
+        
         public override bool Equals(object obj)
         {
             if (!(obj is CustomSet<T>)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-
-            CustomSet<T> customSetObj = (CustomSet<T>)obj;
-            if (Count != customSetObj.Count) return false;
-            return !customSetObj.Where((t, i) => !Collection.Contains(customSetObj.Collection[i])).Any();
-            //for (int i = 0; i < customSetObj.Count; i++)
-            //    if (!Collection.Contains(customSetObj.Collection[i]))
-            //        return false;
-            //return true;
+            return ((IEquatable<CustomSet<T>>)this).Equals((CustomSet<T>) obj);
         }
 
-        protected bool Equals(CustomSet<T> other) => Equals(Collection, other.Collection);
-        
+        bool IEquatable<CustomSet<T>>.Equals(CustomSet<T> other)
+        {
+            if (other == null) return false;
+            if (ReferenceEquals(this, other)) return true;
+            
+            if (Count != other.Count) return false;
+            return !other.Where((t, i) => !Collection.Contains(other.Collection[i])).Any();
+            //for (int i = 0; i < other.Count; i++)
+            //    if (!Collection.Contains(other.Collection[i]))
+            //        return false;
+            //return true;
+            
+        }
+
         public override int GetHashCode() => Collection?.GetHashCode() ?? 0;
 
         /// <summary>
@@ -77,7 +81,7 @@ namespace Task2
         /// Removes specified item from set
         /// </summary>
         /// <param name="item"></param>
-        public void Remove(T item) => Collection.Remove(item);
+        public bool Remove(T item) => Collection.Remove(item);
         
         /// <summary>
         /// Returns set of items each set contains
@@ -85,6 +89,7 @@ namespace Task2
         /// <param name="set1"></param>
         /// <param name="set2"></param>
         /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public static CustomSet<T> Intersect(CustomSet<T> set1, CustomSet<T> set2)
         {
             if (set1 == null || set2 == null) throw new ArgumentNullException();
@@ -101,6 +106,7 @@ namespace Task2
         /// <param name="set1"></param>
         /// <param name="set2"></param>
         /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public static CustomSet<T> Union(CustomSet<T> set1, CustomSet<T> set2)
         {
             if (set1 == null || set2 == null) throw new ArgumentNullException();
@@ -117,6 +123,7 @@ namespace Task2
         /// <param name="set1"></param>
         /// <param name="set2"></param>
         /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public static CustomSet<T> Except(CustomSet<T> set1, CustomSet<T> set2)
         {
             if (set1 == null || set2 == null) throw new ArgumentNullException();
